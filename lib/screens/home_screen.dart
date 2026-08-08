@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import '../widgets/primary_button.dart';
+import 'create_adventure_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,10 +16,11 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
-  late Animation<double> _contentOpacity;
-  late Animation<Offset> _contentSlide;
-
   late Animation<double> _titleMove;
+  late Animation<double> _globeOpacity;
+  late Animation<Offset> _globeSlide;
+  late Animation<double> _buttonsOpacity;
+  late Animation<Offset> _buttonsSlide;
 
   @override
   void initState() {
@@ -26,52 +28,93 @@ class _HomeScreenState extends State<HomeScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 2800),
     );
+
+    // --------------------------------
+    // EVARA
+    // --------------------------------
 
     _titleMove = Tween<double>(
       begin: 0.0,
-      end: -1.0,
+      end: -0.72,
     ).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(
-          0.0,
-          0.65,
-          curve: Curves.easeInOut,
+          0.35,
+          0.70,
+          curve: Curves.easeInOutCubic,
         ),
       ),
     );
 
-    _contentOpacity = Tween<double>(
+    // --------------------------------
+    // GLOBE
+    // --------------------------------
+
+    _globeOpacity = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(
-          0.45,
+          0.55,
+          0.78,
+          curve: Curves.easeIn,
+        ),
+      ),
+    );
+
+    _globeSlide = Tween<Offset>(
+      begin: const Offset(0, 0.12),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(
+          0.55,
+          0.80,
+          curve: Curves.easeOutCubic,
+        ),
+      ),
+    );
+
+    // --------------------------------
+    // BUTTONS
+    // --------------------------------
+
+    _buttonsOpacity = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(
+          0.72,
           1.0,
           curve: Curves.easeIn,
         ),
       ),
     );
 
-    _contentSlide = Tween<Offset>(
-      begin: const Offset(0, 0.15),
+    _buttonsSlide = Tween<Offset>(
+      begin: const Offset(0, 0.10),
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(
-          0.45,
+          0.72,
           1.0,
           curve: Curves.easeOutCubic,
         ),
       ),
     );
 
-    Future.delayed(const Duration(seconds: 3), () {
+    // Start animation after a short pause
+    Future.delayed(const Duration(milliseconds: 1200), () {
       if (mounted) {
         _controller.forward();
       }
@@ -94,56 +137,91 @@ class _HomeScreenState extends State<HomeScreen>
           builder: (context, child) {
             return Stack(
               children: [
-                // WANDER
+
+                // ==========================================
+                // EVARA
+                // ==========================================
+
                 Align(
                   alignment: Alignment(
                     0,
                     _titleMove.value,
                   ),
                   child: Text(
-                    'WANDER',
+                    'EVARA',
                     style: AppTextStyles.title,
                   ),
                 ),
 
+                // ==========================================
+                // GLOBE
+                // ==========================================
 
-                FadeTransition(
-                  opacity: _contentOpacity,
-                  child: SlideTransition(
-                    position: _contentSlide,
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.public,
-                              size: 140,
-                              color: DefaultAppColors.terracotta,
-                            ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Transform.translate(
+                    offset: const Offset(0, -70),
+                    child: FadeTransition(
+                      opacity: _globeOpacity,
+                      child: SlideTransition(
+                        position: _globeSlide,
+                        child: const Icon(
+                          Icons.public,
+                          size: 140,
+                          color: DefaultAppColors.terracotta,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
-                            const SizedBox(height: 70),
+                // ==========================================
+                // BUTTONS
+                // ==========================================
 
-                            PrimaryButton(
-                              text: 'Login',
-                              onPressed: () {},
-                            ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Transform.translate(
+                    offset: const Offset(0, 210),
+                    child: FadeTransition(
+                      opacity: _buttonsOpacity,
+                      child: SlideTransition(
+                        position: _buttonsSlide,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
 
-                            const SizedBox(height: 20),
+                              PrimaryButton(
+                                text: 'Login',
+                                onPressed: () {},
+                              ),
 
-                            PrimaryButton(
-                              text: 'Create Adventure',
-                              onPressed: () {},
-                            ),
+                              const SizedBox(height: 20),
 
-                            const SizedBox(height: 20),
+                              PrimaryButton(
+                                text: 'Create Adventure',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const CreateAdventureScreen(),
+                                    ),
+                                  );
+                                },
+                              ),
 
-                            PrimaryButton(
-                              text: 'Join Adventure',
-                              onPressed: () {},
-                            ),
-                          ],
+                              const SizedBox(height: 20),
+
+                              PrimaryButton(
+                                text: 'Join Adventure',
+                                onPressed: () {},
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

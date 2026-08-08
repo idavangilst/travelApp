@@ -7,11 +7,7 @@ class PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
 
-  const PrimaryButton({
-    super.key,
-    required this.text,
-    required this.onPressed,
-  });
+  const PrimaryButton({super.key, required this.text, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -21,17 +17,14 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: DefaultAppColors.skyBlue,
+          backgroundColor: DefaultAppColors.white,
           foregroundColor: DefaultAppColors.terracotta,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(40),
           ),
         ),
-        child: Text(
-          text,
-          style: AppTextStyles.button,
-        ),
+        child: Text(text, style: AppTextStyles.button),
       ),
     );
   }

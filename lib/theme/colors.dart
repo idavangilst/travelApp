@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 
 class DefaultAppColors {
-  //background
-  static const Color background = Color(0xFFECEEDF);
+  // Main background
+  static const Color background = Color(0xFFFFEAC5);
 
-  //primary
-  static const Color skyBlue = Color(0xFFBBDCE5);
+  // Main accent
+  static const Color terracotta = Color(0xFFB77466);
 
-  //secondary
-  static const Color sand = Color(0xFFD9C4B0);
+  // Light peach
+  static const Color peach = Color(0xFFFFDBB5);
 
-  //accent
-  static const Color terracotta = Color(0xFFCFAB8D);
+  // Muted sand
+  static const Color sand = Color(0xFF957C62);
 
-  //text
-  static const Color textDark = Color(0xFF4B5563);
+  // Dark brown
+  static const Color darkBrown = Color(0xFF6C4E31);
 
-  //white
-  static const Color white = Colors.white;
+  // Text
+  static const Color textDark = Color(0xFF6C4E31);
+
+  // White
+  static const Color white = Color(0xFFFFF1DA);
 }
