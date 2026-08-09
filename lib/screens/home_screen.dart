@@ -4,6 +4,7 @@ import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import '../widgets/primary_button.dart';
 import 'create_adventure_screen.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -35,17 +36,10 @@ class _HomeScreenState extends State<HomeScreen>
     // EVARA
     // --------------------------------
 
-    _titleMove = Tween<double>(
-      begin: 0.0,
-      end: -0.72,
-    ).animate(
+    _titleMove = Tween<double>(begin: 0.0, end: -0.72).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(
-          0.35,
-          0.70,
-          curve: Curves.easeInOutCubic,
-        ),
+        curve: const Interval(0.35, 0.70, curve: Curves.easeInOutCubic),
       ),
     );
 
@@ -53,65 +47,39 @@ class _HomeScreenState extends State<HomeScreen>
     // GLOBE
     // --------------------------------
 
-    _globeOpacity = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+    _globeOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(
-          0.55,
-          0.78,
-          curve: Curves.easeIn,
-        ),
+        curve: const Interval(0.55, 0.78, curve: Curves.easeIn),
       ),
     );
 
-    _globeSlide = Tween<Offset>(
-      begin: const Offset(0, 0.12),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(
-          0.55,
-          0.80,
-          curve: Curves.easeOutCubic,
-        ),
-      ),
-    );
+    _globeSlide = Tween<Offset>(begin: const Offset(0, 0.12), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.55, 0.80, curve: Curves.easeOutCubic),
+          ),
+        );
 
     // --------------------------------
     // BUTTONS
     // --------------------------------
 
-    _buttonsOpacity = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+    _buttonsOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(
-          0.72,
-          1.0,
-          curve: Curves.easeIn,
-        ),
+        curve: const Interval(0.72, 1.0, curve: Curves.easeIn),
       ),
     );
 
-    _buttonsSlide = Tween<Offset>(
-      begin: const Offset(0, 0.10),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(
-          0.72,
-          1.0,
-          curve: Curves.easeOutCubic,
-        ),
-      ),
-    );
+    _buttonsSlide =
+        Tween<Offset>(begin: const Offset(0, 0.10), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.72, 1.0, curve: Curves.easeOutCubic),
+          ),
+        );
 
     // Start animation after a short pause
     Future.delayed(const Duration(milliseconds: 1200), () {
@@ -137,26 +105,17 @@ class _HomeScreenState extends State<HomeScreen>
           builder: (context, child) {
             return Stack(
               children: [
-
                 // ==========================================
                 // EVARA
                 // ==========================================
-
                 Align(
-                  alignment: Alignment(
-                    0,
-                    _titleMove.value,
-                  ),
-                  child: Text(
-                    'EVARA',
-                    style: AppTextStyles.title,
-                  ),
+                  alignment: Alignment(0, _titleMove.value),
+                  child: Text('EVARA', style: AppTextStyles.title),
                 ),
 
                 // ==========================================
                 // GLOBE
                 // ==========================================
-
                 Align(
                   alignment: Alignment.center,
                   child: Transform.translate(
@@ -178,7 +137,6 @@ class _HomeScreenState extends State<HomeScreen>
                 // ==========================================
                 // BUTTONS
                 // ==========================================
-
                 Align(
                   alignment: Alignment.center,
                   child: Transform.translate(
@@ -188,16 +146,20 @@ class _HomeScreenState extends State<HomeScreen>
                       child: SlideTransition(
                         position: _buttonsSlide,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-
                               PrimaryButton(
                                 text: 'Login',
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const LoginScreen(),
+                                    ),
+                                  );
+                                },
                               ),
 
                               const SizedBox(height: 20),
@@ -208,7 +170,8 @@ class _HomeScreenState extends State<HomeScreen>
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const CreateAdventureScreen(),
+                                      builder: (context) =>
+                                          const CreateAdventureScreen(),
                                     ),
                                   );
                                 },
