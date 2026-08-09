@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "769552141236",
+    "project_id": "travelapp-6ba80",
+    "storage_bucket": "travelapp-6ba80.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:769552141236:android:eb2883fcf4f5a1458640e1",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqSSPfasGiF_8tqldzK9BGQmDwzaoDD1c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
