@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import '../widgets/primary_button.dart';
+import '../widgets/text_input.dart';
+import 'adventure_hub_screen.dart';
 import 'create_account_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -18,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -27,8 +30,10 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    if (_emailController.text.trim().isEmpty ||
-        _passwordController.text.isEmpty) {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
       _showMessage('Please enter your email and password.');
       return;
     }
@@ -39,19 +44,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+        email: email,
+        password: password,
       );
 
       if (!mounted) return;
 
-      _showMessage('Welcome back ✨');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const AdventureHubScreen(),
+        ),
+      );
     } on FirebaseAuthException catch (e) {
       String message;
 
       switch (e.code) {
         case 'invalid-credential':
-        case 'wrong-password':
           message = 'Incorrect email or password.';
           break;
 
@@ -59,8 +68,16 @@ class _LoginScreenState extends State<LoginScreen> {
           message = 'No account found with this email.';
           break;
 
+        case 'wrong-password':
+          message = 'Incorrect password.';
+          break;
+
         case 'invalid-email':
           message = 'Please enter a valid email address.';
+          break;
+
+        case 'too-many-requests':
+          message = 'Too many attempts. Please try again later.';
           break;
 
         default:
@@ -81,7 +98,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message),
+      ),
     );
   }
 
@@ -94,7 +113,22 @@ class _LoginScreenState extends State<LoginScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 32),
           child: Column(
             children: [
-              const SizedBox(height: 70),
+              const SizedBox(height: 55),
+
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: DefaultAppColors.terracotta,
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 15),
 
               Text(
                 'EVARA',
@@ -103,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
 
               Text(
                 'Welcome back',
@@ -119,33 +153,47 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: AppTextStyles.body.copyWith(
                   fontSize: 16,
                 ),
+                textAlign: TextAlign.center,
               ),
 
-              const SizedBox(height: 55),
+              const SizedBox(height: 45),
 
-              _EvaraTextField(
-                controller: _emailController,
+              EvaraTextField(
                 label: 'Email',
-                hint: 'Enter your email',
+                hint: 'you@example.com',
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 22),
 
-              _EvaraTextField(
-                controller: _passwordController,
+              EvaraTextField(
                 label: 'Password',
-                hint: 'Enter your password',
-                obscureText: true,
+                hint: 'Your password',
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: DefaultAppColors.terracotta,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
-                    // We add password reset later.
+                    // We'll build password reset later.
                   },
                   child: Text(
                     'Forgot password?',
@@ -157,7 +205,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 20),
 
               _isLoading
                   ? const CircularProgressIndicator(
@@ -168,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: _login,
                     ),
 
-              const SizedBox(height: 35),
+              const SizedBox(height: 30),
 
               Row(
                 children: [
@@ -179,18 +227,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: Text(
                       'or',
                       style: TextStyle(
-                        color: DefaultAppColors.textDark
-                            .withValues(alpha: 0.6),
+                        color: DefaultAppColors.textDark.withValues(
+                          alpha: 0.6,
+                        ),
                       ),
                     ),
                   ),
-
                   Expanded(
                     child: Divider(
                       color: DefaultAppColors.textDark.withValues(
@@ -201,7 +248,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               TextButton(
                 onPressed: () {
@@ -214,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 child: RichText(
                   text: TextSpan(
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: DefaultAppColors.textDark,
                       fontSize: 15,
                     ),
@@ -224,7 +271,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       TextSpan(
                         text: 'Sign up',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: DefaultAppColors.terracotta,
                           fontWeight: FontWeight.bold,
                         ),
@@ -239,60 +286,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _EvaraTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-  final bool obscureText;
-  final TextInputType? keyboardType;
-
-  const _EvaraTextField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-    this.obscureText = false,
-    this.keyboardType,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: DefaultAppColors.textDark,
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        TextField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            hintText: hint,
-            filled: true,
-            fillColor: DefaultAppColors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 18,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

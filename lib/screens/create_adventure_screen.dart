@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/adventure_service.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import '../widgets/primary_button.dart';
@@ -10,17 +11,25 @@ class CreateAdventureScreen extends StatefulWidget {
   const CreateAdventureScreen({super.key});
 
   @override
-  State<CreateAdventureScreen> createState() => _CreateAdventureScreenState();
+  State<CreateAdventureScreen> createState() =>
+      _CreateAdventureScreenState();
 }
 
-class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
+class _CreateAdventureScreenState
+    extends State<CreateAdventureScreen> {
+  final AdventureService _adventureService =
+      AdventureService();
+
   final TextEditingController _adventureNameController =
       TextEditingController();
 
-  final TextEditingController _destinationController = TextEditingController();
+  final TextEditingController _destinationController =
+      TextEditingController();
 
   DateTime? _startDate;
   DateTime? _endDate;
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -28,6 +37,10 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
     _destinationController.dispose();
     super.dispose();
   }
+
+  // ==========================================
+  // START DATE
+  // ==========================================
 
   Future<void> _selectStartDate() async {
     final DateTime? picked = await showDatePicker(
@@ -41,7 +54,7 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
       setState(() {
         _startDate = picked;
 
-        //If enddate before startdate we reset
+        // Reset end date if it is before the new start date
         if (_endDate != null && _endDate!.isBefore(picked)) {
           _endDate = null;
         }
@@ -49,11 +62,20 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
     }
   }
 
+  // ==========================================
+  // END DATE
+  // ==========================================
+
   Future<void> _selectEndDate() async {
     if (_startDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a start date first.')),
+        const SnackBar(
+          content: Text(
+            'Please select a start date first.',
+          ),
+        ),
       );
+
       return;
     }
 
@@ -71,6 +93,79 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
     }
   }
 
+  // ==========================================
+  // CREATE ADVENTURE
+  // ==========================================
+
+  Future<void> _createAdventure() async {
+    final String adventureName =
+        _adventureNameController.text.trim();
+
+    final String destination =
+        _destinationController.text.trim();
+
+    // Validate fields
+    if (adventureName.isEmpty ||
+        destination.isEmpty ||
+        _startDate == null ||
+        _endDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please fill in all fields.',
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final adventure =
+          await _adventureService.createAdventure(
+        adventureName: adventureName,
+        destination: destination,
+        startDate: _startDate!,
+        endDate: _endDate!,
+      );
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AdventureScreen(
+            adventureId: adventure.id,
+            adventureName: adventure.name,
+            destination: adventure.destination,
+            startDate: adventure.startDate,
+            endDate: adventure.endDate,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Something went wrong while creating your adventure.',
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,7 +174,6 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
       appBar: AppBar(
         backgroundColor: DefaultAppColors.background,
         elevation: 0,
-
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: DefaultAppColors.terracotta,
@@ -98,24 +192,32 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
               children: [
                 const SizedBox(height: 20),
 
+                // ==========================================
+                // TITLE
+                // ==========================================
+
                 Text(
                   'Create your adventure',
-                  style: AppTextStyles.title.copyWith(fontSize: 34),
+                  style: AppTextStyles.title.copyWith(
+                    fontSize: 34,
+                  ),
                 ),
 
                 const SizedBox(height: 10),
 
                 Text(
                   "Let's start planning your trip.",
-                  style: TextStyle(
+                  style: AppTextStyles.body.copyWith(
                     fontSize: 16,
-                    color: DefaultAppColors.textDark,
                   ),
                 ),
 
                 const SizedBox(height: 40),
 
-                // Adventure name
+                // ==========================================
+                // ADVENTURE NAME
+                // ==========================================
+
                 EvaraTextField(
                   label: 'Adventure name',
                   hint: 'e.g. Summer in Italy',
@@ -124,7 +226,10 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
 
                 const SizedBox(height: 25),
 
-                // Destination
+                // ==========================================
+                // DESTINATION
+                // ==========================================
+
                 EvaraTextField(
                   label: 'Destination',
                   hint: 'Where are you going?',
@@ -132,6 +237,10 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
                 ),
 
                 const SizedBox(height: 25),
+
+                // ==========================================
+                // START DATE
+                // ==========================================
 
                 Text(
                   'Start date',
@@ -167,14 +276,15 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
 
                         Text(
                           _startDate == null
-                            ? 'Select start date'
-                            : '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}',
+                              ? 'Select start date'
+                              : '${_startDate!.day}/${_startDate!.month}/${_startDate!.year}',
                           style: TextStyle(
                             fontSize: 17,
                             color: _startDate == null
-                              ? DefaultAppColors.textDark.withValues(alpha: 0.45)
-                              : DefaultAppColors.textDark,
-                          ),  
+                                ? DefaultAppColors.textDark
+                                    .withValues(alpha: 0.45)
+                                : DefaultAppColors.textDark,
+                          ),
                         ),
                       ],
                     ),
@@ -182,6 +292,10 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
                 ),
 
                 const SizedBox(height: 8),
+
+                // ==========================================
+                // END DATE
+                // ==========================================
 
                 GestureDetector(
                   onTap: _selectEndDate,
@@ -211,7 +325,8 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
                           style: TextStyle(
                             fontSize: 17,
                             color: _endDate == null
-                                ? DefaultAppColors.textDark.withValues(alpha: 0.45)
+                                ? DefaultAppColors.textDark
+                                    .withValues(alpha: 0.45)
                                 : DefaultAppColors.textDark,
                           ),
                         ),
@@ -222,33 +337,19 @@ class _CreateAdventureScreenState extends State<CreateAdventureScreen> {
 
                 const SizedBox(height: 40),
 
-                PrimaryButton(
-                  text: 'Continue',
-                  onPressed: () {
-                    if (_adventureNameController.text.trim().isEmpty ||
-                        _destinationController.text.trim().isEmpty ||
-                        _startDate == null ||
-                        _endDate == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Please fill in all fields.'),
-                        ),
-                      );
-                      return;
-                    }
+                // ==========================================
+                // CONTINUE
+                // ==========================================
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AdventureScreen(
-                          adventureName: _adventureNameController.text.trim(),
-                          destination: _destinationController.text.trim(),
-                          startDate: _startDate!,
-                          endDate: _endDate!,
+                Center(
+                  child: _isLoading
+                      ? const CircularProgressIndicator(
+                          color: DefaultAppColors.terracotta,
+                        )
+                      : PrimaryButton(
+                          text: 'Continue',
+                          onPressed: _createAdventure,
                         ),
-                      ),
-                    );
-                  },
                 ),
 
                 const SizedBox(height: 30),
