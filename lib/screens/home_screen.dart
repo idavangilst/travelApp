@@ -188,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen>
                             horizontal: 32,
                           ),
                           child: PrimaryButton(
-                            text: 'Login',
+                            text:'Start your adventure',
                             onPressed: () {
                               Navigator.push(
                                 context,

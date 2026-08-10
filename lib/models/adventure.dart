@@ -9,6 +9,7 @@ class Adventure {
   final String ownerId;
   final List<String> memberIds;
   final String inviteCode;
+  final String? coverImageUrl;
   final DateTime? createdAt;
 
   const Adventure({
@@ -20,6 +21,7 @@ class Adventure {
     required this.ownerId,
     required this.memberIds,
     required this.inviteCode,
+    this.coverImageUrl,
     this.createdAt,
   });
 
@@ -36,11 +38,19 @@ class Adventure {
       id: document.id,
       name: data['name'] as String,
       destination: data['destination'] as String,
-      startDate: (data['startDate'] as Timestamp).toDate(),
-      endDate: (data['endDate'] as Timestamp).toDate(),
+      startDate:
+          (data['startDate'] as Timestamp).toDate(),
+      endDate:
+          (data['endDate'] as Timestamp).toDate(),
       ownerId: data['ownerId'] as String,
-      memberIds: List<String>.from(data['memberIds'] ?? []),
+      memberIds:
+          List<String>.from(data['memberIds'] ?? []),
       inviteCode: data['inviteCode'] as String,
+
+      // New
+      coverImageUrl:
+          data['coverImageUrl'] as String?,
+
       createdAt: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : null,
@@ -56,6 +66,10 @@ class Adventure {
       'ownerId': ownerId,
       'memberIds': memberIds,
       'inviteCode': inviteCode,
+
+      // New
+      'coverImageUrl': coverImageUrl,
+
       'createdAt': createdAt != null
           ? Timestamp.fromDate(createdAt!)
           : FieldValue.serverTimestamp(),
