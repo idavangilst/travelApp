@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
-import '../widgets/primary_button.dart';
 import 'create_adventure_screen.dart';
 import 'join_adventure_screen.dart';
 import 'my_adventures_screen.dart';
@@ -13,8 +12,7 @@ class AdventureHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final User? user =
-        FirebaseAuth.instance.currentUser;
+    final User? user = FirebaseAuth.instance.currentUser;
 
     final String name =
         user?.displayName?.isNotEmpty == true
@@ -27,26 +25,46 @@ class AdventureHubScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: 32,
+            horizontal: 28,
           ),
           child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 55),
+              const SizedBox(height: 28),
 
               // ==========================================
-              // EVARA
+              // TOP BAR
               // ==========================================
 
-              Text(
-                'EVARA',
-                style: AppTextStyles.title.copyWith(
-                  fontSize: 32,
-                ),
+              Row(
+                children: [
+                  Text(
+                    'EVARA',
+                    style: AppTextStyles.title.copyWith(
+                      fontSize: 29,
+                      letterSpacing: 2,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      color: DefaultAppColors.peach,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.person_outline,
+                      color: DefaultAppColors.terracotta,
+                      size: 25,
+                    ),
+                  ),
+                ],
               ),
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 52),
 
               // ==========================================
               // WELCOME
@@ -55,30 +73,32 @@ class AdventureHubScreen extends StatelessWidget {
               Text(
                 'Welcome back, $name',
                 style: AppTextStyles.body.copyWith(
-                  fontSize: 25,
+                  fontSize: 27,
                   color: DefaultAppColors.terracotta,
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
               Text(
                 'Where will you go next?',
                 style: AppTextStyles.body.copyWith(
-                  fontSize: 20,
+                  fontSize: 21,
                   color: DefaultAppColors.textDark,
                 ),
               ),
 
-              const Spacer(),
+              const SizedBox(height: 38),
 
               // ==========================================
               // CREATE ADVENTURE
               // ==========================================
 
-              PrimaryButton(
-                text: 'Create Adventure',
-                onPressed: () {
+              _AdventureActionCard(
+                icon: Icons.add_location_alt_outlined,
+                title: 'Create Adventure',
+                subtitle: 'Start a new journey',
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -89,13 +109,17 @@ class AdventureHubScreen extends StatelessWidget {
                 },
               ),
 
-              const SizedBox(height: 20),
-              
-              
+              const SizedBox(height: 14),
+
+              // ==========================================
               // JOIN ADVENTURE
-              PrimaryButton(
-                text: 'Join Adventure',
-                onPressed: () {
+              // ==========================================
+
+              _AdventureActionCard(
+                icon: Icons.group_add_outlined,
+                title: 'Join Adventure',
+                subtitle: 'Join a journey with friends',
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -106,12 +130,17 @@ class AdventureHubScreen extends StatelessWidget {
                 },
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 14),
 
+              // ==========================================
               // MY ADVENTURES
-              PrimaryButton(
-                text: 'My Adventures',
-                onPressed: () {
+              // ==========================================
+
+              _AdventureActionCard(
+                icon: Icons.luggage_outlined,
+                title: 'My Adventures',
+                subtitle: 'See your saved journeys',
+                onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -122,11 +151,14 @@ class AdventureHubScreen extends StatelessWidget {
                 },
               ),
 
-              const SizedBox(height: 35),
+              const Spacer(),
 
+              // ==========================================
               // LOG OUT
+              // ==========================================
+
               Center(
-                child: TextButton(
+                child: TextButton.icon(
                   onPressed: () async {
                     await FirebaseAuth.instance.signOut();
 
@@ -134,18 +166,118 @@ class AdventureHubScreen extends StatelessWidget {
 
                     Navigator.pop(context);
                   },
-                  child: Text(
+                  icon: const Icon(
+                    Icons.logout_outlined,
+                    size: 18,
+                    color: DefaultAppColors.terracotta,
+                  ),
+                  label: Text(
                     'Log out',
-                    style: TextStyle(
-                      color:
-                          DefaultAppColors.terracotta,
+                    style: AppTextStyles.body.copyWith(
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
+                      color: DefaultAppColors.terracotta,
                     ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ======================================================
+// ADVENTURE ACTION CARD
+// ======================================================
+
+class _AdventureActionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _AdventureActionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 21,
+          ),
+          decoration: BoxDecoration(
+            color: DefaultAppColors.white,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Row(
+            children: [
+              // ICON
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: DefaultAppColors.peach,
+                  borderRadius: BorderRadius.circular(19),
+                ),
+                child: Icon(
+                  icon,
+                  color: DefaultAppColors.terracotta,
+                  size: 29,
+                ),
+              ),
+
+              const SizedBox(width: 17),
+
+              // TEXT
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: AppTextStyles.body.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      subtitle,
+                      style: AppTextStyles.body.copyWith(
+                        fontSize: 14,
+                        color: DefaultAppColors.textDark.withValues(
+                          alpha: 0.55,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // ARROW
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 17,
+                color: DefaultAppColors.terracotta,
+              ),
             ],
           ),
         ),

@@ -66,5 +66,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>EVARA needs access to your photos so you can save and share your travel memories.</string>
+
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>EVARA needs permission to save your travel memories to your photo library.</string>
 </dict>
 </plist>

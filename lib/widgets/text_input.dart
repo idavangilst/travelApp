@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/colors.dart';
+import '../theme/text_styles.dart';
 
 class EvaraTextField extends StatelessWidget {
   final String label;
@@ -26,58 +27,83 @@ class EvaraTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ==========================================
+        // LABEL
+        // ==========================================
+
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 16,
+          style: AppTextStyles.body.copyWith(
+            fontSize: 17,
             fontWeight: FontWeight.w600,
-            color: DefaultAppColors.textDark,
           ),
         ),
 
-        const SizedBox(height: 8),
+        const SizedBox(height: 7),
+
+        // ==========================================
+        // TEXT FIELD
+        // ==========================================
 
         TextField(
           controller: controller,
           keyboardType: keyboardType,
           obscureText: obscureText,
 
-          style: const TextStyle(
+          style: AppTextStyles.body.copyWith(
             fontSize: 17,
             color: DefaultAppColors.textDark,
           ),
 
+          cursorColor:
+              DefaultAppColors.terracotta,
+
           decoration: InputDecoration(
             hintText: hint,
 
-            hintStyle: TextStyle(
-              color: DefaultAppColors.textDark.withValues(alpha: 0.45),
+            hintStyle:
+                AppTextStyles.body.copyWith(
+              fontSize: 17,
+              color: DefaultAppColors.textDark
+                  .withValues(alpha: 0.42),
             ),
 
             filled: true,
             fillColor: DefaultAppColors.white,
 
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 18,
+            // Gør feltet mindre og mere elegant
+            contentPadding:
+                const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 14,
             ),
 
             suffixIcon: suffixIcon,
 
+            // ==========================================
+            // BORDER
+            // ==========================================
+
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius:
+                  BorderRadius.circular(18),
               borderSide: BorderSide.none,
             ),
 
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
+            enabledBorder:
+                OutlineInputBorder(
+              borderRadius:
+                  BorderRadius.circular(18),
               borderSide: BorderSide.none,
             ),
 
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
+            focusedBorder:
+                OutlineInputBorder(
+              borderRadius:
+                  BorderRadius.circular(18),
               borderSide: const BorderSide(
-                color: DefaultAppColors.terracotta,
+                color:
+                    DefaultAppColors.terracotta,
                 width: 1.5,
               ),
             ),

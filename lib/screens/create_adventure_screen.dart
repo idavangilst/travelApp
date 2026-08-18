@@ -156,7 +156,8 @@ class _CreateAdventureScreenState
           .child('$adventureId.jpg');
 
       debugPrint(
-        'Uploading image to: ${storageReference.fullPath}',
+        'Uploading image to: '
+        '${storageReference.fullPath}',
       );
 
       final UploadTask uploadTask =
@@ -276,11 +277,14 @@ class _CreateAdventureScreenState
           builder: (context) => AdventureScreen(
             adventureId: updatedAdventure.id,
             adventureName: updatedAdventure.name,
-            destination: updatedAdventure.destination,
+            destination:
+                updatedAdventure.destination,
             startDate: updatedAdventure.startDate,
             endDate: updatedAdventure.endDate,
-            inviteCode: updatedAdventure.inviteCode,
-            coverImageUrl: updatedAdventure.coverImageUrl,
+            inviteCode:
+                updatedAdventure.inviteCode,
+            coverImageUrl:
+                updatedAdventure.coverImageUrl,
           ),
         ),
       );
@@ -316,6 +320,73 @@ class _CreateAdventureScreenState
   }
 
   // ==========================================
+  // DATE FIELD
+  // ==========================================
+
+  Widget _buildDateField({
+    required String label,
+    required DateTime? date,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: AppTextStyles.body.copyWith(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        GestureDetector(
+          onTap: _isLoading ? null : onTap,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 18,
+              vertical: 15,
+            ),
+            decoration: BoxDecoration(
+              color: DefaultAppColors.white,
+              borderRadius:
+                  BorderRadius.circular(18),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.calendar_today_outlined,
+                  color:
+                      DefaultAppColors.terracotta,
+                  size: 21,
+                ),
+
+                const SizedBox(width: 13),
+
+                Text(
+                  date == null
+                      ? 'Select $label'
+                      : _formatDate(date),
+                  style:
+                      AppTextStyles.body.copyWith(
+                    fontSize: 17,
+                    color: date == null
+                        ? DefaultAppColors.textDark
+                            .withValues(alpha: 0.45)
+                        : DefaultAppColors.textDark,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ==========================================
   // BUILD
   // ==========================================
 
@@ -325,13 +396,18 @@ class _CreateAdventureScreenState
       backgroundColor:
           DefaultAppColors.background,
 
+      // ==========================================
+      // APP BAR
+      // ==========================================
+
       appBar: AppBar(
         backgroundColor:
             DefaultAppColors.background,
         elevation: 0,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           icon: const Icon(
-            Icons.arrow_back,
+            Icons.arrow_back_ios_new,
           ),
           color:
               DefaultAppColors.terracotta,
@@ -352,7 +428,7 @@ class _CreateAdventureScreenState
               crossAxisAlignment:
                   CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
 
                 // ==========================================
                 // TITLE
@@ -366,17 +442,17 @@ class _CreateAdventureScreenState
                   ),
                 ),
 
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
 
                 Text(
                   "Let's start planning your trip.",
                   style:
                       AppTextStyles.body.copyWith(
-                    fontSize: 16,
+                    fontSize: 18,
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 30),
 
                 // ==========================================
                 // COVER IMAGE
@@ -384,20 +460,23 @@ class _CreateAdventureScreenState
 
                 Text(
                   'Cover photo',
-                  style: AppTextStyles.body.copyWith(
-                    fontSize: 16,
-                    fontWeight:
-                        FontWeight.w600,
+                  style:
+                      AppTextStyles.body.copyWith(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
 
                 const SizedBox(height: 8),
 
                 GestureDetector(
-                  onTap: _pickCoverImage,
+                  onTap:
+                      _isLoading
+                          ? null
+                          : _pickCoverImage,
                   child: Container(
                     width: double.infinity,
-                    height: 190,
+                    height: 180,
                     decoration: BoxDecoration(
                       color:
                           DefaultAppColors.peach,
@@ -414,100 +493,104 @@ class _CreateAdventureScreenState
                             )
                           : null,
                     ),
-                    child: _coverImage == null
-                        ? Column(
-                            mainAxisAlignment:
-                                MainAxisAlignment
-                                    .center,
-                            children: [
-                              Container(
-                                width: 58,
-                                height: 58,
+                    child:
+                        _coverImage == null
+                            ? Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment
+                                        .center,
+                                children: [
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration:
+                                        const BoxDecoration(
+                                      color:
+                                          DefaultAppColors
+                                              .white,
+                                      shape:
+                                          BoxShape
+                                              .circle,
+                                    ),
+                                    child:
+                                        const Icon(
+                                      Icons
+                                          .add_a_photo_outlined,
+                                      size: 26,
+                                      color:
+                                          DefaultAppColors
+                                              .terracotta,
+                                    ),
+                                  ),
+
+                                  const SizedBox(
+                                    height: 11,
+                                  ),
+
+                                  Text(
+                                    'Add a cover photo',
+                                    style: AppTextStyles
+                                        .body
+                                        .copyWith(
+                                      fontSize: 18,
+                                      fontWeight:
+                                          FontWeight
+                                              .w600,
+                                      color:
+                                          DefaultAppColors
+                                              .terracotta,
+                                    ),
+                                  ),
+
+                                  const SizedBox(
+                                    height: 2,
+                                  ),
+
+                                  Text(
+                                    'Choose a photo from your library',
+                                    style: AppTextStyles
+                                        .body
+                                        .copyWith(
+                                      fontSize: 14,
+                                      color:
+                                          DefaultAppColors
+                                              .textDark
+                                              .withValues(
+                                        alpha: 0.60,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Container(
                                 decoration:
                                     BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius
+                                          .circular(
+                                    24,
+                                  ),
                                   color:
-                                      DefaultAppColors
-                                          .white,
-                                  shape:
-                                      BoxShape.circle,
+                                      Colors.black
+                                          .withValues(
+                                    alpha: 0.20,
+                                  ),
                                 ),
                                 child:
-                                    const Icon(
-                                  Icons
-                                      .add_a_photo_outlined,
-                                  size: 27,
-                                  color:
-                                      DefaultAppColors
-                                          .terracotta,
-                                ),
-                              ),
-
-                              const SizedBox(
-                                height: 12,
-                              ),
-
-                              Text(
-                                'Add a cover photo',
-                                style: AppTextStyles
-                                    .body
-                                    .copyWith(
-                                  fontSize: 17,
-                                  fontWeight:
-                                      FontWeight
-                                          .w600,
-                                  color:
-                                      DefaultAppColors
-                                          .terracotta,
-                                ),
-                              ),
-
-                              const SizedBox(
-                                height: 3,
-                              ),
-
-                              Text(
-                                'Choose a photo from your library',
-                                style: AppTextStyles
-                                    .body
-                                    .copyWith(
-                                  fontSize: 13,
-                                  color:
-                                      DefaultAppColors
-                                          .textDark
-                                          .withValues(
-                                    alpha: 0.60,
+                                    const Center(
+                                  child: Icon(
+                                    Icons
+                                        .edit_outlined,
+                                    color:
+                                        Colors.white,
+                                    size: 28,
                                   ),
                                 ),
                               ),
-                            ],
-                          )
-                        : Container(
-                            decoration:
-                                BoxDecoration(
-                              borderRadius:
-                                  BorderRadius
-                                      .circular(
-                                24,
-                              ),
-                              color: Colors.black
-                                  .withValues(
-                                alpha: 0.20,
-                              ),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons
-                                    .edit_outlined,
-                                color:
-                                    Colors.white,
-                                size: 28,
-                              ),
-                            ),
-                          ),
                   ),
                 ),
 
-                const SizedBox(height: 28),
+                const SizedBox(height: 25),
 
                 // ==========================================
                 // ADVENTURE NAME
@@ -520,7 +603,7 @@ class _CreateAdventureScreenState
                       _adventureNameController,
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 22),
 
                 // ==========================================
                 // DESTINATION
@@ -533,169 +616,63 @@ class _CreateAdventureScreenState
                       _destinationController,
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 22),
 
                 // ==========================================
                 // START DATE
                 // ==========================================
 
-                Text(
-                  'Start date',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight:
-                        FontWeight.w600,
-                    color:
-                        DefaultAppColors.textDark,
-                  ),
+                _buildDateField(
+                  label: 'Start date',
+                  date: _startDate,
+                  onTap: _selectStartDate,
                 ),
 
-                const SizedBox(height: 8),
-
-                GestureDetector(
-                  onTap:
-                      _selectStartDate,
-                  child: Container(
-                    width: double.infinity,
-                    padding:
-                        const EdgeInsets
-                            .symmetric(
-                      horizontal: 20,
-                      vertical: 18,
-                    ),
-                    decoration:
-                        BoxDecoration(
-                      color:
-                          DefaultAppColors.white,
-                      borderRadius:
-                          BorderRadius.circular(
-                        18,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons
-                              .calendar_today_outlined,
-                          color:
-                              DefaultAppColors
-                                  .terracotta,
-                        ),
-
-                        const SizedBox(
-                          width: 14,
-                        ),
-
-                        Text(
-                          _startDate == null
-                              ? 'Select start date'
-                              : _formatDate(
-                                  _startDate!,
-                                ),
-                          style: TextStyle(
-                            fontSize: 17,
-                            color: _startDate ==
-                                    null
-                                ? DefaultAppColors
-                                    .textDark
-                                    .withValues(
-                                    alpha: 0.45,
-                                  )
-                                : DefaultAppColors
-                                    .textDark,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
 
                 // ==========================================
                 // END DATE
                 // ==========================================
 
-                GestureDetector(
-                  onTap:
-                      _selectEndDate,
-                  child: Container(
-                    width: double.infinity,
-                    padding:
-                        const EdgeInsets
-                            .symmetric(
-                      horizontal: 20,
-                      vertical: 18,
-                    ),
-                    decoration:
-                        BoxDecoration(
-                      color:
-                          DefaultAppColors.white,
-                      borderRadius:
-                          BorderRadius.circular(
-                        18,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons
-                              .calendar_today_outlined,
-                          color:
-                              DefaultAppColors
-                                  .terracotta,
-                        ),
-
-                        const SizedBox(
-                          width: 14,
-                        ),
-
-                        Text(
-                          _endDate == null
-                              ? 'Select end date'
-                              : _formatDate(
-                                  _endDate!,
-                                ),
-                          style: TextStyle(
-                            fontSize: 17,
-                            color: _endDate ==
-                                    null
-                                ? DefaultAppColors
-                                    .textDark
-                                    .withValues(
-                                    alpha: 0.45,
-                                  )
-                                : DefaultAppColors
-                                    .textDark,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                _buildDateField(
+                  label: 'End date',
+                  date: _endDate,
+                  onTap: _selectEndDate,
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
 
                 // ==========================================
                 // CREATE BUTTON
                 // ==========================================
 
                 Center(
-                  child: _isLoading
-                      ? const CircularProgressIndicator(
-                          color:
-                              DefaultAppColors
-                                  .terracotta,
-                        )
-                      : PrimaryButton(
-                          text:
-                              'Create Adventure',
-                          onPressed:
-                              _createAdventure,
-                        ),
+                  child:
+                      _isLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child:
+                                  CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color:
+                                    DefaultAppColors
+                                        .terracotta,
+                              ),
+                            )
+                          : const SizedBox(),
                 ),
 
-                const SizedBox(height: 30),
+                if (!_isLoading)
+                  Center(
+                    child: PrimaryButton(
+                      text: 'Create Adventure',
+                      onPressed:
+                          _createAdventure,
+                    ),
+                  ),
+
+                const SizedBox(height: 28),
               ],
             ),
           ),

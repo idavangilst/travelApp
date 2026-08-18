@@ -73,6 +73,7 @@ class _JoinAdventureScreenState
             startDate: adventure.startDate,
             endDate: adventure.endDate,
             inviteCode: adventure.inviteCode,
+            coverImageUrl: adventure.coverImageUrl,
           ),
         ),
       );
