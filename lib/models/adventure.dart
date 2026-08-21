@@ -10,6 +10,7 @@ class Adventure {
   final List<String> memberIds;
   final String inviteCode;
   final String? coverImageUrl;
+  final String defaultCurrency;
   final DateTime? createdAt;
 
   const Adventure({
@@ -22,6 +23,7 @@ class Adventure {
     required this.memberIds,
     required this.inviteCode,
     this.coverImageUrl,
+    required this.defaultCurrency,
     this.createdAt,
   });
 
@@ -36,22 +38,17 @@ class Adventure {
 
     return Adventure(
       id: document.id,
-      name: data['name'] as String,
-      destination: data['destination'] as String,
-      startDate:
-          (data['startDate'] as Timestamp).toDate(),
-      endDate:
-          (data['endDate'] as Timestamp).toDate(),
-      ownerId: data['ownerId'] as String,
-      memberIds:
-          List<String>.from(data['memberIds'] ?? []),
-      inviteCode: data['inviteCode'] as String,
-
-      // New
-      coverImageUrl:
-          data['coverImageUrl'] as String?,
-
-      createdAt: data['createdAt'] != null
+      name: data['name']?.toString() ?? '',
+      destination: data['destination']?.toString() ?? '',
+      startDate: (data['startDate'] as Timestamp).toDate(),
+      endDate: (data['endDate'] as Timestamp).toDate(),
+      ownerId: data['ownerId']?.toString() ?? '',
+      memberIds: List<String>.from(data['memberIds'] ?? []),
+      inviteCode: data['inviteCode']?.toString() ?? '',
+      coverImageUrl: data['coverImageUrl']?.toString(),
+      defaultCurrency:
+          data['defaultCurrency']?.toString() ?? 'DKK',
+      createdAt: data['createdAt'] is Timestamp
           ? (data['createdAt'] as Timestamp).toDate()
           : null,
     );
@@ -66,10 +63,8 @@ class Adventure {
       'ownerId': ownerId,
       'memberIds': memberIds,
       'inviteCode': inviteCode,
-
-      // New
       'coverImageUrl': coverImageUrl,
-
+      'defaultCurrency': defaultCurrency,
       'createdAt': createdAt != null
           ? Timestamp.fromDate(createdAt!)
           : FieldValue.serverTimestamp(),

@@ -20,43 +20,31 @@ class AdventureService {
     required DateTime startDate,
     required DateTime endDate,
     String? coverImageUrl,
+    String defaultCurrency = 'DKK',
   }) async {
     final User? user = _auth.currentUser;
 
     if (user == null) {
-      throw Exception(
-        'No user is currently logged in.',
-      );
+      throw Exception('No user is currently logged in.');
     }
 
-    final String inviteCode =
-        _generateInviteCode();
+    final String inviteCode = _generateInviteCode();
 
-    final DocumentReference<
-        Map<String, dynamic>> adventureRef =
-        await _firestore
-            .collection('adventures')
-            .add({
+    final DocumentReference<Map<String, dynamic>> adventureRef =
+        await _firestore.collection('adventures').add({
       'name': adventureName,
       'destination': destination,
-      'startDate':
-          Timestamp.fromDate(startDate),
-      'endDate':
-          Timestamp.fromDate(endDate),
+      'startDate': Timestamp.fromDate(startDate),
+      'endDate': Timestamp.fromDate(endDate),
       'ownerId': user.uid,
       'memberIds': [user.uid],
       'inviteCode': inviteCode,
-
-      // Cover image
       'coverImageUrl': coverImageUrl,
-
-      'createdAt':
-          FieldValue.serverTimestamp(),
+      'defaultCurrency': defaultCurrency,
+      'createdAt': FieldValue.serverTimestamp(),
     });
 
-    final DocumentSnapshot<
-        Map<String, dynamic>> snapshot =
-        await adventureRef.get();
+    final snapshot = await adventureRef.get();
 
     return Adventure.fromFirestore(snapshot);
   }
@@ -71,59 +59,84 @@ class AdventureService {
     final User? user = _auth.currentUser;
 
     if (user == null) {
-      throw Exception(
-        'No user is currently logged in.',
-      );
+      throw Exception('No user is currently logged in.');
     }
 
-    // Find adventure by invite code
-    final QuerySnapshot<
-        Map<String, dynamic>> querySnapshot =
+    final String normalizedCode =
+        inviteCode.trim().toUpperCase();
+
+    final QuerySnapshot<Map<String, dynamic>> querySnapshot =
         await _firestore
             .collection('adventures')
             .where(
               'inviteCode',
-              isEqualTo: inviteCode,
+              isEqualTo: normalizedCode,
             )
             .limit(1)
             .get();
 
-    // No adventure found
     if (querySnapshot.docs.isEmpty) {
-      throw Exception(
-        'Adventure not found.',
-      );
+      throw Exception('Adventure not found.');
     }
 
-    final DocumentSnapshot<
-        Map<String, dynamic>> document =
-        querySnapshot.docs.first;
+    final document = querySnapshot.docs.first;
 
     final Adventure adventure =
         Adventure.fromFirestore(document);
 
-    // Check if user is already a member
     if (adventure.memberIds.contains(user.uid)) {
-      throw Exception(
-        'You are already a member.',
-      );
+      throw Exception('You are already a member.');
     }
 
-    // Add user to member list
     await document.reference.update({
-      'memberIds': FieldValue.arrayUnion(
-        [user.uid],
-      ),
+      'memberIds': FieldValue.arrayUnion([
+        user.uid,
+      ]),
     });
 
-    // Get updated adventure
-    final DocumentSnapshot<
-        Map<String, dynamic>> updatedDocument =
+    final updatedDocument =
         await document.reference.get();
 
-    return Adventure.fromFirestore(
-      updatedDocument,
-    );
+    return Adventure.fromFirestore(updatedDocument);
+  }
+
+  // ==========================================
+  // GET ADVENTURE
+  // ==========================================
+
+  Future<Adventure> getAdventure(
+    String adventureId,
+  ) async {
+    final document = await _firestore
+        .collection('adventures')
+        .doc(adventureId)
+        .get();
+
+    if (!document.exists) {
+      throw Exception('Adventure not found.');
+    }
+
+    return Adventure.fromFirestore(document);
+  }
+
+  // ==========================================
+  // GET ADVENTURE STREAM
+  // ==========================================
+
+  Stream<Adventure> getAdventureStream(
+    String adventureId,
+  ) {
+    return _firestore
+        .collection('adventures')
+        .doc(adventureId)
+        .snapshots()
+        .map((document) {
+      if (!document.exists) {
+        throw Exception('Adventure not found.');
+      }
+
+      return Adventure.fromFirestore(document);
+    });
   }
 
   // ==========================================

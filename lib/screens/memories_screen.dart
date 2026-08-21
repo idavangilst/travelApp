@@ -27,21 +27,19 @@ class MemoriesScreen extends StatefulWidget {
 }
 
 class _MemoriesScreenState extends State<MemoriesScreen> {
-  final FirebaseFirestore _firestore =
-      FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   bool _isDownloadingAll = false;
 
-  // ==========================================
-  // ADD MEMORY POPUP
-  // ==========================================
+  // ======================================================
+  // ADD MEMORY
+  // ======================================================
 
   void _showAddMemoryDialog() {
     final TextEditingController titleController =
         TextEditingController();
 
     final ImagePicker imagePicker = ImagePicker();
-
     final List<File> selectedImages = [];
 
     bool isUploading = false;
@@ -51,14 +49,7 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
       barrierDismissible: !isUploading,
       builder: (dialogContext) {
         return StatefulBuilder(
-          builder: (
-            context,
-            setDialogState,
-          ) {
-            // ==========================================
-            // PICK IMAGES
-            // ==========================================
-
+          builder: (context, setDialogState) {
             Future<void> pickImages() async {
               try {
                 final List<XFile> pickedImages =
@@ -67,16 +58,13 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                   maxWidth: 1600,
                 );
 
-                if (pickedImages.isEmpty) {
-                  return;
-                }
+                if (pickedImages.isEmpty) return;
 
                 setDialogState(() {
                   for (final image in pickedImages) {
                     final File file = File(image.path);
 
-                    final bool alreadyAdded =
-                        selectedImages.any(
+                    final bool alreadyAdded = selectedImages.any(
                       (existingImage) =>
                           existingImage.path == file.path,
                     );
@@ -87,7 +75,7 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                   }
                 });
               } catch (e) {
-                if (!mounted) return;
+                if (!context.mounted) return;
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -99,23 +87,14 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
               }
             }
 
-            // ==========================================
-            // REMOVE IMAGE
-            // ==========================================
-
             void removeImage(int index) {
               setDialogState(() {
                 selectedImages.removeAt(index);
               });
             }
 
-            // ==========================================
-            // SAVE MEMORY
-            // ==========================================
-
             Future<void> saveMemory() async {
-              final String title =
-                  titleController.text.trim();
+              final String title = titleController.text.trim();
 
               if (title.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -125,7 +104,6 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                     ),
                   ),
                 );
-
                 return;
               }
 
@@ -137,7 +115,6 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                     ),
                   ),
                 );
-
                 return;
               }
 
@@ -155,10 +132,6 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                   );
                 }
 
-                // ==========================================
-                // CREATE MEMORY DOCUMENT
-                // ==========================================
-
                 final DocumentReference memoryReference =
                     await _firestore
                         .collection('adventures')
@@ -167,22 +140,18 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                         .add({
                   'title': title,
                   'createdBy': user.uid,
-                  'createdAt':
-                      FieldValue.serverTimestamp(),
+                  'createdAt': FieldValue.serverTimestamp(),
                   'imageUrls': [],
                 });
 
                 final List<String> imageUrls = [];
 
-                // ==========================================
-                // UPLOAD EACH IMAGE
-                // ==========================================
-
-                for (int i = 0;
-                    i < selectedImages.length;
-                    i++) {
-                  final File image =
-                      selectedImages[i];
+                for (
+                  int i = 0;
+                  i < selectedImages.length;
+                  i++
+                ) {
+                  final File image = selectedImages[i];
 
                   final Reference storageReference =
                       FirebaseStorage.instance
@@ -193,11 +162,6 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                           .child(
                             '${i}_${DateTime.now().millisecondsSinceEpoch}.jpg',
                           );
-
-                  debugPrint(
-                    'Uploading memory image: '
-                    '${storageReference.fullPath}',
-                  );
 
                   await storageReference.putFile(
                     image,
@@ -211,10 +175,6 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
 
                   imageUrls.add(imageUrl);
                 }
-
-                // ==========================================
-                // SAVE IMAGE URLS
-                // ==========================================
 
                 await memoryReference.update({
                   'imageUrls': imageUrls,
@@ -254,23 +214,18 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
 
             return Dialog(
               backgroundColor: Colors.transparent,
-              insetPadding:
-                  const EdgeInsets.symmetric(
+              insetPadding: const EdgeInsets.symmetric(
                 horizontal: 20,
                 vertical: 24,
               ),
               child: Container(
-                constraints:
-                    const BoxConstraints(
+                constraints: const BoxConstraints(
                   maxHeight: 700,
                 ),
-                padding:
-                    const EdgeInsets.all(26),
+                padding: const EdgeInsets.all(26),
                 decoration: BoxDecoration(
-                  color:
-                      DefaultAppColors.background,
-                  borderRadius:
-                      BorderRadius.circular(30),
+                  color: DefaultAppColors.background,
+                  borderRadius: BorderRadius.circular(30),
                 ),
                 child: SingleChildScrollView(
                   child: Column(
@@ -278,15 +233,14 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                         CrossAxisAlignment.start,
                     children: [
                       // HEADER
+
                       Row(
                         children: [
                           Container(
                             width: 54,
                             height: 54,
-                            decoration:
-                                BoxDecoration(
-                              color:
-                                  DefaultAppColors.peach,
+                            decoration: BoxDecoration(
+                              color: DefaultAppColors.peach,
                               borderRadius:
                                   BorderRadius.circular(18),
                             ),
@@ -297,7 +251,9 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                               size: 27,
                             ),
                           ),
+
                           const SizedBox(width: 15),
+
                           Expanded(
                             child: Column(
                               crossAxisAlignment:
@@ -310,14 +266,17 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                                     fontSize: 27,
                                   ),
                                 ),
+
                                 const SizedBox(height: 2),
+
                                 Text(
                                   'Save a moment from your adventure',
                                   style:
                                       AppTextStyles.body.copyWith(
                                     fontSize: 13,
                                     color:
-                                        DefaultAppColors.textDark.withValues(
+                                        DefaultAppColors.textDark
+                                            .withValues(
                                       alpha: 0.60,
                                     ),
                                   ),
@@ -325,15 +284,13 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                               ],
                             ),
                           ),
+
                           IconButton(
-                            onPressed:
-                                isUploading
-                                    ? null
-                                    : () {
-                                        Navigator.pop(
-                                          context,
-                                        );
-                                      },
+                            onPressed: isUploading
+                                ? null
+                                : () {
+                                    Navigator.pop(context);
+                                  },
                             icon: const Icon(
                               Icons.close,
                               color:
@@ -346,51 +303,45 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                       const SizedBox(height: 25),
 
                       // TITLE
+
                       Text(
                         'Memory title',
-                        style:
-                            AppTextStyles.body.copyWith(
+                        style: AppTextStyles.body.copyWith(
                           fontSize: 15,
-                          fontWeight:
-                              FontWeight.w600,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
 
                       const SizedBox(height: 8),
 
                       Container(
-                        decoration:
-                            BoxDecoration(
-                          color:
-                              DefaultAppColors.white,
+                        decoration: BoxDecoration(
+                          color: DefaultAppColors.white,
                           borderRadius:
                               BorderRadius.circular(18),
                         ),
                         child: TextField(
-                          controller:
-                              titleController,
-                          enabled:
-                              !isUploading,
+                          controller: titleController,
+                          enabled: !isUploading,
                           textCapitalization:
                               TextCapitalization.sentences,
                           style:
                               AppTextStyles.body.copyWith(
                             fontSize: 16,
                           ),
-                          decoration:
-                              InputDecoration(
+                          decoration: InputDecoration(
                             hintText:
                                 'e.g. First day in Rome ❤️',
                             hintStyle:
                                 AppTextStyles.body.copyWith(
                               fontSize: 16,
                               color:
-                                  DefaultAppColors.textDark.withValues(
+                                  DefaultAppColors.textDark
+                                      .withValues(
                                 alpha: 0.40,
                               ),
                             ),
-                            border:
-                                InputBorder.none,
+                            border: InputBorder.none,
                             contentPadding:
                                 const EdgeInsets.symmetric(
                               horizontal: 18,
@@ -403,6 +354,7 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                       const SizedBox(height: 22),
 
                       // PHOTOS HEADER
+
                       Row(
                         children: [
                           Text(
@@ -410,11 +362,12 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                             style:
                                 AppTextStyles.body.copyWith(
                               fontSize: 15,
-                              fontWeight:
-                                  FontWeight.w600,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
+
                           const Spacer(),
+
                           if (selectedImages.isNotEmpty)
                             Text(
                               '${selectedImages.length} '
@@ -423,7 +376,8 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                                   AppTextStyles.body.copyWith(
                                 fontSize: 13,
                                 color:
-                                    DefaultAppColors.textDark.withValues(
+                                    DefaultAppColors.textDark
+                                        .withValues(
                                   alpha: 0.55,
                                 ),
                               ),
@@ -433,86 +387,88 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
 
                       const SizedBox(height: 9),
 
-                      // SELECT PHOTOS
+                      // CHOOSE PHOTOS
+
                       GestureDetector(
                         onTap:
-                            isUploading
-                                ? null
-                                : pickImages,
+                            isUploading ? null : pickImages,
                         child: Container(
-                          width:
-                              double.infinity,
-                          height:
-                              selectedImages.isEmpty
-                                  ? 130
-                                  : 58,
-                          decoration:
-                              BoxDecoration(
-                            color:
-                                DefaultAppColors.peach,
+                          width: double.infinity,
+                          height: selectedImages.isEmpty
+                              ? 130
+                              : 58,
+                          decoration: BoxDecoration(
+                            color: DefaultAppColors.peach,
                             borderRadius:
                                 BorderRadius.circular(20),
                           ),
-                          child:
-                              selectedImages.isEmpty
-                                  ? Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons
-                                              .add_photo_alternate_outlined,
-                                          size: 30,
-                                          color:
-                                              DefaultAppColors.terracotta,
-                                        ),
-                                        const SizedBox(
-                                            height: 7),
-                                        Text(
-                                          'Choose photos',
-                                          style:
-                                              AppTextStyles.body.copyWith(
-                                            fontSize: 16,
-                                            fontWeight:
-                                                FontWeight.w600,
-                                            color:
-                                                DefaultAppColors.terracotta,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons
-                                              .add_photo_alternate_outlined,
-                                          size: 23,
-                                          color:
-                                              DefaultAppColors.terracotta,
-                                        ),
-                                        const SizedBox(
-                                            width: 8),
-                                        Text(
-                                          'Add more photos',
-                                          style:
-                                              AppTextStyles.body.copyWith(
-                                            fontSize: 15,
-                                            fontWeight:
-                                                FontWeight.w600,
-                                            color:
-                                                DefaultAppColors.terracotta,
-                                          ),
-                                        ),
-                                      ],
+                          child: selectedImages.isEmpty
+                              ? Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons
+                                          .add_photo_alternate_outlined,
+                                      size: 30,
+                                      color:
+                                          DefaultAppColors
+                                              .terracotta,
                                     ),
+
+                                    const SizedBox(height: 7),
+
+                                    Text(
+                                      'Choose photos',
+                                      style:
+                                          AppTextStyles.body.copyWith(
+                                        fontSize: 16,
+                                        fontWeight:
+                                            FontWeight.w600,
+                                        color:
+                                            DefaultAppColors
+                                                .terracotta,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons
+                                          .add_photo_alternate_outlined,
+                                      size: 23,
+                                      color:
+                                          DefaultAppColors
+                                              .terracotta,
+                                    ),
+
+                                    const SizedBox(width: 8),
+
+                                    Text(
+                                      'Add more photos',
+                                      style:
+                                          AppTextStyles.body.copyWith(
+                                        fontSize: 15,
+                                        fontWeight:
+                                            FontWeight.w600,
+                                        color:
+                                            DefaultAppColors
+                                                .terracotta,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                         ),
                       ),
 
                       // PHOTO GRID
+
                       if (selectedImages.isNotEmpty) ...[
                         const SizedBox(height: 14),
+
                         GridView.builder(
                           shrinkWrap: true,
                           physics:
@@ -525,34 +481,29 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 8,
                           ),
-                          itemBuilder:
-                              (context, index) {
+                          itemBuilder: (context, index) {
                             return Stack(
                               children: [
                                 Positioned.fill(
                                   child: ClipRRect(
                                     borderRadius:
                                         BorderRadius.circular(14),
-                                    child:
-                                        Image.file(
+                                    child: Image.file(
                                       selectedImages[index],
                                       fit: BoxFit.cover,
                                     ),
                                   ),
                                 ),
+
                                 Positioned(
                                   top: 5,
                                   right: 5,
-                                  child:
-                                      GestureDetector(
-                                    onTap:
-                                        isUploading
-                                            ? null
-                                            : () {
-                                                removeImage(
-                                                  index,
-                                                );
-                                              },
+                                  child: GestureDetector(
+                                    onTap: isUploading
+                                        ? null
+                                        : () {
+                                            removeImage(index);
+                                          },
                                     child: Container(
                                       width: 27,
                                       height: 27,
@@ -562,15 +513,12 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                                             Colors.black.withValues(
                                           alpha: 0.65,
                                         ),
-                                        shape:
-                                            BoxShape.circle,
+                                        shape: BoxShape.circle,
                                       ),
-                                      child:
-                                          const Icon(
+                                      child: const Icon(
                                         Icons.close,
                                         size: 16,
-                                        color:
-                                            Colors.white,
+                                        color: Colors.white,
                                       ),
                                     ),
                                   ),
@@ -584,22 +532,20 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                       const SizedBox(height: 25),
 
                       // SAVE
+
                       SizedBox(
-                        width:
-                            double.infinity,
+                        width: double.infinity,
                         height: 54,
-                        child:
-                            ElevatedButton(
+                        child: ElevatedButton(
                           onPressed:
-                              isUploading
-                                  ? null
-                                  : saveMemory,
+                              isUploading ? null : saveMemory,
                           style:
                               ElevatedButton.styleFrom(
                             backgroundColor:
                                 DefaultAppColors.terracotta,
                             disabledBackgroundColor:
-                                DefaultAppColors.terracotta.withValues(
+                                DefaultAppColors.terracotta
+                                    .withValues(
                               alpha: 0.5,
                             ),
                             foregroundColor:
@@ -611,27 +557,26 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                                   BorderRadius.circular(28),
                             ),
                           ),
-                          child:
-                              isUploading
-                                  ? const SizedBox(
-                                      width: 23,
-                                      height: 23,
-                                      child:
-                                          CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        color:
-                                            DefaultAppColors.white,
-                                      ),
-                                    )
-                                  : Text(
-                                      'Save memory',
-                                      style:
-                                          AppTextStyles.button.copyWith(
-                                        color:
-                                            DefaultAppColors.white,
-                                        fontSize: 18,
-                                      ),
-                                    ),
+                          child: isUploading
+                              ? const SizedBox(
+                                  width: 23,
+                                  height: 23,
+                                  child:
+                                      CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color:
+                                        DefaultAppColors.white,
+                                  ),
+                                )
+                              : Text(
+                                  'Save memory',
+                                  style:
+                                      AppTextStyles.button.copyWith(
+                                    color:
+                                        DefaultAppColors.white,
+                                    fontSize: 18,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
@@ -647,17 +592,15 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
     });
   }
 
-  // ==========================================
+  // ======================================================
   // OPEN MEMORY
-  // ==========================================
+  // ======================================================
 
   void _showMemoryDetails(
     String title,
     List<String> imageUrls,
   ) {
-    if (imageUrls.isEmpty) {
-      return;
-    }
+    if (imageUrls.isEmpty) return;
 
     Navigator.push(
       context,
@@ -670,64 +613,61 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
     );
   }
 
-  // ==========================================
+  // ======================================================
+  // VIEW ALL
+  // ======================================================
+
+  void _viewAllPhotos() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AllMemoriesScreen(
+          adventureId: widget.adventureId,
+        ),
+      ),
+    );
+  }
+
+  // ======================================================
   // DOWNLOAD ONE IMAGE
-  // ==========================================
+  // ======================================================
 
   Future<void> _downloadImage(
     String imageUrl,
     String fileName,
   ) async {
-    try {
-      final response =
-          await http.get(Uri.parse(imageUrl));
+    final response =
+        await http.get(Uri.parse(imageUrl));
 
-      if (response.statusCode != 200) {
-        throw Exception(
-          'Could not download image.',
-        );
-      }
-
-      final Uint8List bytes =
-          response.bodyBytes;
-
-      final result =
-          await SaverGallery.saveImage(
-        bytes,
-        quality: 100,
-        fileName: fileName,
-        skipIfExists: false,
-        albumPath: 'EVARA',
-      );
-
-      debugPrint(
-        'IMAGE SAVED: ${result.savedUri}',
-      );
-    } catch (e) {
-      debugPrint(
-        'DOWNLOAD IMAGE ERROR: $e',
-      );
-
-      rethrow;
+    if (response.statusCode != 200) {
+      throw Exception('Could not download image.');
     }
+
+    final Uint8List bytes = response.bodyBytes;
+
+    final result = await SaverGallery.saveImage(
+      bytes,
+      quality: 100,
+      fileName: fileName,
+      skipIfExists: false,
+      albumPath: 'EVARA',
+    );
+
+    debugPrint('IMAGE SAVED: ${result.savedUri}');
   }
 
-  // ==========================================
+  // ======================================================
   // DOWNLOAD MEMORY
-  // ==========================================
+  // ======================================================
 
   Future<void> _downloadMemory(
     String title,
     List<String> imageUrls,
   ) async {
-    if (imageUrls.isEmpty) {
-      return;
-    }
+    if (imageUrls.isEmpty) return;
 
     try {
-      for (int i = 0;
-          i < imageUrls.length;
-          i++) {
+      for (int i = 0; i < imageUrls.length; i++) {
         await _downloadImage(
           imageUrls[i],
           'EVARA_${_safeFileName(title)}_$i.jpg',
@@ -736,8 +676,7 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             '${imageUrls.length} '
@@ -747,10 +686,11 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
         ),
       );
     } catch (e) {
+      debugPrint('DOWNLOAD MEMORY ERROR: $e');
+
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'Could not download the photos.',
@@ -760,55 +700,24 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
     }
   }
 
-  // ==========================================
+  // ======================================================
   // DOWNLOAD ALL PHOTOS
-  // ==========================================
+  // ======================================================
 
   Future<void> _downloadAllPhotos() async {
-    if (_isDownloadingAll) {
-      return;
-    }
+    if (_isDownloadingAll) return;
 
     setState(() {
       _isDownloadingAll = true;
     });
 
     try {
-      final QuerySnapshot<
-          Map<String, dynamic>> snapshot =
+      final QuerySnapshot<Map<String, dynamic>> snapshot =
           await _firestore
               .collection('adventures')
               .doc(widget.adventureId)
               .collection('memories')
               .get();
-
-      int totalPhotos = 0;
-
-      for (final document in snapshot.docs) {
-        final data = document.data();
-
-        final List<String> imageUrls =
-            List<String>.from(
-          data['imageUrls'] ?? [],
-        );
-
-        totalPhotos += imageUrls.length;
-      }
-
-      if (totalPhotos == 0) {
-        if (!mounted) return;
-
-        ScaffoldMessenger.of(context)
-            .showSnackBar(
-          const SnackBar(
-            content: Text(
-              'There are no photos to download yet.',
-            ),
-          ),
-        );
-
-        return;
-      }
 
       int downloadedPhotos = 0;
 
@@ -823,26 +732,30 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
           data['imageUrls'] ?? [],
         );
 
-        for (int i = 0;
-            i < imageUrls.length;
-            i++) {
-          downloadedPhotos++;
-
-          if (mounted) {
-            setState(() {});
-          }
-
+        for (int i = 0; i < imageUrls.length; i++) {
           await _downloadImage(
             imageUrls[i],
             'EVARA_${_safeFileName(title)}_$i.jpg',
           );
+
+          downloadedPhotos++;
         }
       }
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      if (downloadedPhotos == 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'There are no photos to download yet.',
+            ),
+          ),
+        );
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             '$downloadedPhotos '
@@ -852,14 +765,11 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
         ),
       );
     } catch (e) {
-      debugPrint(
-        'DOWNLOAD ALL ERROR: $e',
-      );
+      debugPrint('DOWNLOAD ALL ERROR: $e');
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'Could not download all photos.',
@@ -875,9 +785,9 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
     }
   }
 
-  // ==========================================
+  // ======================================================
   // SAFE FILE NAME
-  // ==========================================
+  // ======================================================
 
   String _safeFileName(String value) {
     return value
@@ -891,44 +801,40 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
         );
   }
 
-  // ==========================================
+  // ======================================================
   // BUILD
-  // ==========================================
+  // ======================================================
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          DefaultAppColors.background,
-          floatingActionButton: FloatingActionButton.extended(
-          onPressed: _showAddMemoryDialog,
-          backgroundColor: DefaultAppColors.terracotta,
-          elevation: 4,
-          icon: const Icon(
-            Icons.add_photo_alternate_outlined,
-            color: DefaultAppColors.white,
-          ),
-          label: Text(
-            'Add memory',
-            style: AppTextStyles.button.copyWith(
-              color: DefaultAppColors.white,
-              fontSize: 15,
-            ),
-          ),
+      backgroundColor: DefaultAppColors.background,
+
+      // ==================================================
+      // ADD MEMORY BUTTON
+      // ==================================================
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddMemoryDialog,
+        backgroundColor: DefaultAppColors.terracotta,
+        foregroundColor: DefaultAppColors.white,
+        elevation: 2,
+        child: const Icon(
+          Icons.add,
+          size: 28,
         ),
+      ),
+
       body: SafeArea(
         child: Padding(
-          padding:
-              const EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
             horizontal: 28,
           ),
           child: Column(
             children: [
               const SizedBox(height: 10),
 
-              // ==========================================
               // TOP BAR
-              // ==========================================
 
               Row(
                 children: [
@@ -949,8 +855,7 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
 
                   Text(
                     'EVARA',
-                    style:
-                        AppTextStyles.title.copyWith(
+                    style: AppTextStyles.title.copyWith(
                       fontSize: 22,
                       letterSpacing: 2,
                     ),
@@ -960,14 +865,11 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
 
               const SizedBox(height: 28),
 
-              // ==========================================
               // HEADER
-              // ==========================================
 
               Text(
                 'Memories',
-                style:
-                    AppTextStyles.title.copyWith(
+                style: AppTextStyles.title.copyWith(
                   fontSize: 38,
                 ),
                 textAlign: TextAlign.center,
@@ -977,79 +879,99 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
 
               Text(
                 widget.adventureName,
-                style:
-                    AppTextStyles.body.copyWith(
+                style: AppTextStyles.body.copyWith(
                   fontSize: 18,
-                  color:
-                      DefaultAppColors.textDark
-                          .withValues(alpha: 0.60),
+                  color: DefaultAppColors.textDark
+                      .withValues(alpha: 0.60),
                 ),
                 textAlign: TextAlign.center,
               ),
 
               const SizedBox(height: 20),
 
-              // ==========================================
-              // DOWNLOAD ALL
-              // ==========================================
+              // VIEW ALL + DOWNLOAD ALL
 
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton.icon(
-                  onPressed:
-                      _isDownloadingAll
-                          ? null
-                          : _downloadAllPhotos,
-                  icon:
-                      _isDownloadingAll
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child:
-                                  CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color:
-                                    DefaultAppColors.white,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.download_outlined,
-                              size: 20,
+              Row(
+                mainAxisAlignment:
+                    MainAxisAlignment.end,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: _viewAllPhotos,
+                    icon: const Icon(
+                      Icons.grid_view_rounded,
+                      size: 17,
+                    ),
+                    label: const Text(
+                      'View all',
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: DefaultAppColors.terracotta,
+                      foregroundColor: DefaultAppColors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 9,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  ElevatedButton.icon(
+                    onPressed: _isDownloadingAll
+                        ? null
+                        : _downloadAllPhotos,
+                    icon: _isDownloadingAll
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child:
+                                CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color:
+                                  DefaultAppColors.white,
                             ),
-                  label: Text(
-                    _isDownloadingAll
-                        ? 'Downloading...'
-                        : 'Download all',
-                  ),
-                  style:
-                      ElevatedButton.styleFrom(
-                    backgroundColor:
-                        DefaultAppColors.terracotta,
-                    disabledBackgroundColor:
-                        DefaultAppColors.terracotta
-                            .withValues(alpha: 0.5),
-                    foregroundColor:
-                        DefaultAppColors.white,
-                    elevation: 0,
-                    padding:
-                        const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 12,
+                          )
+                        : const Icon(
+                            Icons.download_outlined,
+                            size: 17,
+                          ),
+                    label: Text(
+                      _isDownloadingAll
+                          ? 'Downloading...'
+                          : 'Download all',
                     ),
-                    shape:
-                        RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(24),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          DefaultAppColors.terracotta,
+                      disabledBackgroundColor:
+                          DefaultAppColors.terracotta
+                              .withValues(
+                        alpha: 0.5,
+                      ),
+                      foregroundColor:
+                          DefaultAppColors.white,
+                      elevation: 0,
+                      padding:
+                          const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 9,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(22),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
 
               const SizedBox(height: 12),
 
-              // ==========================================
               // MEMORY LIST
-              // ==========================================
 
               Expanded(
                 child: StreamBuilder<
@@ -1064,10 +986,8 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                         descending: true,
                       )
                       .snapshots(),
-                  builder:
-                      (context, snapshot) {
-                    if (snapshot
-                            .connectionState ==
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState ==
                         ConnectionState.waiting) {
                       return const Center(
                         child:
@@ -1091,8 +1011,7 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                     }
 
                     final memories =
-                        snapshot.data?.docs ??
-                            [];
+                        snapshot.data?.docs ?? [];
 
                     if (memories.isEmpty) {
                       return _buildEmptyState();
@@ -1101,8 +1020,7 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                     return ListView.separated(
                       physics:
                           const BouncingScrollPhysics(),
-                      itemCount:
-                          memories.length,
+                      itemCount: memories.length,
                       separatorBuilder:
                           (context, index) =>
                               const SizedBox(
@@ -1111,24 +1029,19 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
                       itemBuilder:
                           (context, index) {
                         final data =
-                            memories[index]
-                                .data();
+                            memories[index].data();
 
-                        final List<String>
-                            imageUrls =
+                        final List<String> imageUrls =
                             List<String>.from(
-                          data['imageUrls'] ??
-                              [],
+                          data['imageUrls'] ?? [],
                         );
 
                         final String title =
-                            data['title'] ??
-                                'Memory';
+                            data['title'] ?? 'Memory';
 
                         return _MemoryCard(
                           title: title,
-                          imageUrls:
-                              imageUrls,
+                          imageUrls: imageUrls,
                           onTap: () {
                             _showMemoryDetails(
                               title,
@@ -1156,9 +1069,9 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
     );
   }
 
-  // ==========================================
+  // ======================================================
   // EMPTY STATE
-  // ==========================================
+  // ======================================================
 
   Widget _buildEmptyState() {
     return Center(
@@ -1169,18 +1082,15 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
           Container(
             width: 90,
             height: 90,
-            decoration:
-                BoxDecoration(
-              color:
-                  DefaultAppColors.peach,
+            decoration: BoxDecoration(
+              color: DefaultAppColors.peach,
               borderRadius:
                   BorderRadius.circular(30),
             ),
             child: const Icon(
               Icons.photo_library_outlined,
               size: 42,
-              color:
-                  DefaultAppColors.terracotta,
+              color: DefaultAppColors.terracotta,
             ),
           ),
 
@@ -1188,8 +1098,7 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
 
           Text(
             'No memories yet',
-            style:
-                AppTextStyles.title.copyWith(
+            style: AppTextStyles.title.copyWith(
               fontSize: 27,
             ),
             textAlign: TextAlign.center,
@@ -1200,12 +1109,10 @@ class _MemoriesScreenState extends State<MemoriesScreen> {
           Text(
             'Save the moments that make\n'
             'your adventure special.',
-            style:
-                AppTextStyles.body.copyWith(
+            style: AppTextStyles.body.copyWith(
               fontSize: 16,
-              color:
-                  DefaultAppColors.textDark
-                      .withValues(alpha: 0.62),
+              color: DefaultAppColors.textDark
+                  .withValues(alpha: 0.62),
             ),
             textAlign: TextAlign.center,
           ),
@@ -1243,32 +1150,22 @@ class _MemoryCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        decoration:
-            BoxDecoration(
-          color:
-              DefaultAppColors.white,
-          borderRadius:
-              BorderRadius.circular(24),
+        decoration: BoxDecoration(
+          color: DefaultAppColors.white,
+          borderRadius: BorderRadius.circular(24),
         ),
-        clipBehavior:
-            Clip.antiAlias,
+        clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment:
               CrossAxisAlignment.start,
           children: [
-            // ==========================================
-            // COVER
-            // ==========================================
-
             Stack(
               children: [
                 if (coverImage != null)
                   SizedBox(
-                    width:
-                        double.infinity,
+                    width: double.infinity,
                     height: 190,
-                    child:
-                        Image.network(
+                    child: Image.network(
                       coverImage,
                       fit: BoxFit.cover,
                       errorBuilder:
@@ -1280,14 +1177,12 @@ class _MemoryCard extends StatelessWidget {
                         return Container(
                           color:
                               DefaultAppColors.peach,
-                          child:
-                              const Icon(
+                          child: const Icon(
                             Icons
                                 .image_not_supported_outlined,
                             size: 40,
                             color:
-                                DefaultAppColors
-                                    .terracotta,
+                                DefaultAppColors.terracotta,
                           ),
                         );
                       },
@@ -1295,47 +1190,37 @@ class _MemoryCard extends StatelessWidget {
                   )
                 else
                   Container(
-                    width:
-                        double.infinity,
+                    width: double.infinity,
                     height: 190,
-                    color:
-                        DefaultAppColors.peach,
-                    child:
-                        const Icon(
+                    color: DefaultAppColors.peach,
+                    child: const Icon(
                       Icons.photo_outlined,
                       size: 45,
                       color:
-                          DefaultAppColors
-                              .terracotta,
+                          DefaultAppColors.terracotta,
                     ),
                   ),
 
-                // DOWNLOAD BUTTON
                 Positioned(
                   top: 12,
                   right: 12,
                   child: GestureDetector(
-                    onTap:
-                        imageUrls.isEmpty
-                            ? null
-                            : onDownload,
+                    onTap: imageUrls.isEmpty
+                        ? null
+                        : onDownload,
                     child: Container(
                       width: 43,
                       height: 43,
-                      decoration:
-                          BoxDecoration(
+                      decoration: BoxDecoration(
                         color:
                             Colors.black.withValues(
                           alpha: 0.55,
                         ),
-                        shape:
-                            BoxShape.circle,
+                        shape: BoxShape.circle,
                       ),
-                      child:
-                          const Icon(
+                      child: const Icon(
                         Icons.download_outlined,
-                        color:
-                            Colors.white,
+                        color: Colors.white,
                         size: 21,
                       ),
                     ),
@@ -1344,13 +1229,8 @@ class _MemoryCard extends StatelessWidget {
               ],
             ),
 
-            // ==========================================
-            // INFO
-            // ==========================================
-
             Padding(
-              padding:
-                  const EdgeInsets.all(18),
+              padding: const EdgeInsets.all(18),
               child: Row(
                 children: [
                   Expanded(
@@ -1358,7 +1238,7 @@ class _MemoryCard extends StatelessWidget {
                       title,
                       style:
                           AppTextStyles.body.copyWith(
-                        fontSize: 16,
+                        fontSize: 20,
                         fontWeight:
                             FontWeight.w600,
                       ),
@@ -1371,14 +1251,11 @@ class _MemoryCard extends StatelessWidget {
                       horizontal: 11,
                       vertical: 6,
                     ),
-                    decoration:
-                        BoxDecoration(
+                    decoration: BoxDecoration(
                       color:
                           DefaultAppColors.peach,
                       borderRadius:
-                          BorderRadius.circular(
-                        14,
-                      ),
+                          BorderRadius.circular(14),
                     ),
                     child: Text(
                       '${imageUrls.length} '
@@ -1401,8 +1278,7 @@ class _MemoryCard extends StatelessWidget {
                     Icons.arrow_forward_ios,
                     size: 15,
                     color:
-                        DefaultAppColors
-                            .terracotta,
+                        DefaultAppColors.terracotta,
                   ),
                 ],
               ),
@@ -1415,18 +1291,185 @@ class _MemoryCard extends StatelessWidget {
 }
 
 // ======================================================
+// ALL MEMORIES SCREEN
+// ======================================================
+
+class AllMemoriesScreen extends StatelessWidget {
+  final String adventureId;
+
+  const AllMemoriesScreen({
+    super.key,
+    required this.adventureId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: DefaultAppColors.background,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color:
+                          DefaultAppColors.terracotta,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  Text(
+                    'All photos',
+                    style:
+                        AppTextStyles.title.copyWith(
+                      fontSize: 30,
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  const SizedBox(width: 48),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              Expanded(
+                child: StreamBuilder<
+                    QuerySnapshot<
+                        Map<String, dynamic>>>(
+                  stream: FirebaseFirestore.instance
+                      .collection('adventures')
+                      .doc(adventureId)
+                      .collection('memories')
+                      .orderBy(
+                        'createdAt',
+                        descending: true,
+                      )
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(
+                        child:
+                            CircularProgressIndicator(
+                          color:
+                              DefaultAppColors.terracotta,
+                        ),
+                      );
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Could not load photos.',
+                          style: AppTextStyles.body,
+                        ),
+                      );
+                    }
+
+                    final memories =
+                        snapshot.data?.docs ?? [];
+
+                    final List<String> allImages = [];
+
+                    for (final memory in memories) {
+                      final data = memory.data();
+
+                      final List<String> imageUrls =
+                          List<String>.from(
+                        data['imageUrls'] ?? [],
+                      );
+
+                      allImages.addAll(imageUrls);
+                    }
+
+                    if (allImages.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'No photos yet',
+                          style:
+                              AppTextStyles.body.copyWith(
+                            fontSize: 18,
+                          ),
+                        ),
+                      );
+                    }
+
+                    return GridView.builder(
+                      physics:
+                          const BouncingScrollPhysics(),
+                      itemCount: allImages.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
+                      ),
+                      itemBuilder:
+                          (context, index) {
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MemoryDetailsScreen(
+                                  title: 'All photos',
+                                  imageUrls: allImages,
+                                  initialIndex: index,
+                                ),
+                              ),
+                            );
+                          },
+                          child: ClipRRect(
+                            borderRadius:
+                                BorderRadius.circular(14),
+                            child: Image.network(
+                              allImages[index],
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ======================================================
 // MEMORY DETAILS SCREEN
 // ======================================================
 
-class MemoryDetailsScreen
-    extends StatefulWidget {
+class MemoryDetailsScreen extends StatefulWidget {
   final String title;
   final List<String> imageUrls;
+  final int initialIndex;
 
   const MemoryDetailsScreen({
     super.key,
     required this.title,
     required this.imageUrls,
+    this.initialIndex = 0,
   });
 
   @override
@@ -1436,11 +1479,22 @@ class MemoryDetailsScreen
 
 class _MemoryDetailsScreenState
     extends State<MemoryDetailsScreen> {
-  final PageController _pageController =
-      PageController();
+  late final PageController _pageController;
 
-  int _currentIndex = 0;
+  late int _currentIndex;
+
   bool _isDownloading = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _currentIndex = widget.initialIndex;
+
+    _pageController = PageController(
+      initialPage: widget.initialIndex,
+    );
+  }
 
   @override
   void dispose() {
@@ -1448,28 +1502,21 @@ class _MemoryDetailsScreenState
     super.dispose();
   }
 
-  // ==========================================
-  // DOWNLOAD CURRENT MEMORY
-  // ==========================================
-
   Future<void> _downloadPhotos() async {
-    if (_isDownloading) {
-      return;
-    }
+    if (_isDownloading) return;
 
     setState(() {
       _isDownloading = true;
     });
 
     try {
-      for (int i = 0;
-          i < widget.imageUrls.length;
-          i++) {
-        final response =
-            await http.get(
-          Uri.parse(
-            widget.imageUrls[i],
-          ),
+      for (
+        int i = 0;
+        i < widget.imageUrls.length;
+        i++
+      ) {
+        final response = await http.get(
+          Uri.parse(widget.imageUrls[i]),
         );
 
         if (response.statusCode != 200) {
@@ -1490,8 +1537,7 @@ class _MemoryDetailsScreenState
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             '${widget.imageUrls.length} '
@@ -1503,8 +1549,7 @@ class _MemoryDetailsScreenState
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'Could not download the photos.',
@@ -1535,54 +1580,41 @@ class _MemoryDetailsScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          Colors.black,
-
+      backgroundColor: Colors.black,
       body: SafeArea(
         child: Stack(
           children: [
-            // ==========================================
             // PHOTOS
-            // ==========================================
 
             PageView.builder(
-              controller:
-                  _pageController,
-              itemCount:
-                  widget.imageUrls.length,
-              onPageChanged:
-                  (index) {
+              controller: _pageController,
+              itemCount: widget.imageUrls.length,
+              onPageChanged: (index) {
                 setState(() {
-                  _currentIndex =
-                      index;
+                  _currentIndex = index;
                 });
               },
-              itemBuilder:
-                  (context, index) {
+              itemBuilder: (context, index) {
                 return InteractiveViewer(
                   minScale: 0.8,
                   maxScale: 4.0,
                   child: Center(
-                    child:
-                        Image.network(
+                    child: Image.network(
                       widget.imageUrls[index],
                       fit: BoxFit.contain,
-                      loadingBuilder:
-                          (
+                      loadingBuilder: (
                         context,
                         child,
                         loadingProgress,
                       ) {
-                        if (loadingProgress ==
-                            null) {
+                        if (loadingProgress == null) {
                           return child;
                         }
 
                         return const Center(
                           child:
                               CircularProgressIndicator(
-                            color:
-                                Colors.white,
+                            color: Colors.white,
                           ),
                         );
                       },
@@ -1592,9 +1624,7 @@ class _MemoryDetailsScreenState
               },
             ),
 
-            // ==========================================
             // TOP BAR
-            // ==========================================
 
             Positioned(
               top: 10,
@@ -1603,29 +1633,21 @@ class _MemoryDetailsScreenState
               child: Row(
                 children: [
                   Container(
-                    decoration:
-                        BoxDecoration(
+                    decoration: BoxDecoration(
                       color:
                           Colors.black.withValues(
                         alpha: 0.45,
                       ),
-                      shape:
-                          BoxShape.circle,
+                      shape: BoxShape.circle,
                     ),
-                    child:
-                        IconButton(
-                      icon:
-                          const Icon(
-                        Icons
-                            .arrow_back_ios_new,
-                        color:
-                            Colors.white,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
                         size: 20,
                       ),
                       onPressed: () {
-                        Navigator.pop(
-                          context,
-                        );
+                        Navigator.pop(context);
                       },
                     ),
                   ),
@@ -1635,28 +1657,23 @@ class _MemoryDetailsScreenState
                   Expanded(
                     child: Container(
                       padding:
-                          const EdgeInsets
-                              .symmetric(
+                          const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 10,
                       ),
-                      decoration:
-                          BoxDecoration(
+                      decoration: BoxDecoration(
                         color:
                             Colors.black.withValues(
                           alpha: 0.45,
                         ),
                         borderRadius:
-                            BorderRadius.circular(
-                          22,
-                        ),
+                            BorderRadius.circular(22),
                       ),
                       child: Text(
                         widget.title,
                         style:
                             AppTextStyles.body.copyWith(
-                          color:
-                              Colors.white,
+                          color: Colors.white,
                           fontSize: 17,
                           fontWeight:
                               FontWeight.w600,
@@ -1671,50 +1688,39 @@ class _MemoryDetailsScreenState
                   const SizedBox(width: 12),
 
                   Container(
-                    decoration:
-                        BoxDecoration(
+                    decoration: BoxDecoration(
                       color:
                           Colors.black.withValues(
                         alpha: 0.45,
                       ),
-                      shape:
-                          BoxShape.circle,
+                      shape: BoxShape.circle,
                     ),
-                    child:
-                        IconButton(
-                      icon:
-                          _isDownloading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child:
-                                      CircularProgressIndicator(
-                                    strokeWidth:
-                                        2,
-                                    color:
-                                        Colors.white,
-                                  ),
-                                )
-                              : const Icon(
-                                  Icons
-                                      .download_outlined,
-                                  color:
-                                      Colors.white,
-                                  size: 22,
-                                ),
-                      onPressed:
-                          _isDownloading
-                              ? null
-                              : _downloadPhotos,
+                    child: IconButton(
+                      icon: _isDownloading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child:
+                                  CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.download_outlined,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                      onPressed: _isDownloading
+                          ? null
+                          : _downloadPhotos,
                     ),
                   ),
                 ],
               ),
             ),
 
-            // ==========================================
             // IMAGE COUNTER
-            // ==========================================
 
             Positioned(
               bottom: 30,
@@ -1724,29 +1730,24 @@ class _MemoryDetailsScreenState
                 children: [
                   Container(
                     padding:
-                        const EdgeInsets
-                            .symmetric(
+                        const EdgeInsets.symmetric(
                       horizontal: 15,
                       vertical: 7,
                     ),
-                    decoration:
-                        BoxDecoration(
+                    decoration: BoxDecoration(
                       color:
                           Colors.black.withValues(
                         alpha: 0.55,
                       ),
                       borderRadius:
-                          BorderRadius.circular(
-                        20,
-                      ),
+                          BorderRadius.circular(20),
                     ),
                     child: Text(
                       '${_currentIndex + 1} / '
                       '${widget.imageUrls.length}',
                       style:
                           AppTextStyles.body.copyWith(
-                        color:
-                            Colors.white,
+                        color: Colors.white,
                         fontSize: 14,
                         fontWeight:
                             FontWeight.w600,
@@ -1756,34 +1757,27 @@ class _MemoryDetailsScreenState
 
                   const SizedBox(height: 12),
 
-                  // DOTS
-                  if (widget.imageUrls.length <=
-                      15)
+                  if (widget.imageUrls.length <= 15)
                     Row(
                       mainAxisAlignment:
                           MainAxisAlignment.center,
-                      children:
-                          List.generate(
+                      children: List.generate(
                         widget.imageUrls.length,
                         (index) {
                           return AnimatedContainer(
-                            duration:
-                                const Duration(
+                            duration: const Duration(
                               milliseconds: 200,
                             ),
                             margin:
-                                const EdgeInsets
-                                    .symmetric(
+                                const EdgeInsets.symmetric(
                               horizontal: 3,
                             ),
                             width:
-                                index ==
-                                        _currentIndex
+                                index == _currentIndex
                                     ? 18
                                     : 6,
                             height: 6,
-                            decoration:
-                                BoxDecoration(
+                            decoration: BoxDecoration(
                               color:
                                   Colors.white.withValues(
                                 alpha:

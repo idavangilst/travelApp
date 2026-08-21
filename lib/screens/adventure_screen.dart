@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../theme/colors.dart';
 import '../theme/text_styles.dart';
 import 'memories_screen.dart';
+import 'split_expenses_screen.dart';
 
 class AdventureScreen extends StatefulWidget {
   final String adventureId;
@@ -728,12 +729,20 @@ class _AdventureScreenState extends State<AdventureScreen> {
                 const SizedBox(height: 15),
 
                 _AdventureOption(
-                  icon:
-                      Icons.account_balance_wallet_outlined,
-                  title: 'Expenses',
-                  subtitle:
-                      'Keep track of what you spend together',
-                  onTap: () {},
+                  icon: Icons.account_balance_wallet_outlined,
+                  title: 'Split expenses',
+                  subtitle: 'Keep track of what you spend together',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SplitExpensesScreen(
+                          adventureId: widget.adventureId,
+                          adventureName: widget.adventureName,
+                        ),
+                      ),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 30),
